@@ -5,14 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return "green"
-
-# if __name__ == "__main__":
-#     app.run()
-
-
 # შექმნილი აპლიკაციისთვის ბაზის მისამართის გაწერა, აქვე ბაზას ვარქმევთ სახელს
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///workout.db'
 
@@ -111,14 +103,47 @@ def create_workout():
 
     return jsonify(workout.to_dict()), 200
 
-@app.route('/workout/<int:workout_id>', methods=['GET'])
-def get_workout(workout_id):
-    # return "great no shit u here", 200
-    workout = Workout.query.get(workout_id)
-    if workout is None:
-        return jsonify({'error': 'Workout not found'}), 404
+# @app.route('/workout/<int:workout_id>', methods=['GET'])
+# def get_workout(workout_id):
+#     # return "great no shit u here", 200
+#     workout = Workout.query.get(workout_id)
+#     if workout is None:
+#         return jsonify({'error': 'Workout not found'}), 404
+#
+#     return jsonify(workout.to_dict()), 200
 
-    return jsonify(workout.to_dict()), 200
+
+
+
+
+
+
+
+
+
+
+# Main Page api
+@app.route('/')
+def index_page():
+    workouts = Workout.query.all()
+    if workouts is None:
+        return jsonify({'error': 'Workouts not found'}), 404
+
+    workout_list = [workout.to_dict() for workout in workouts]
+    return render_template('index.html', workout_list=workout_list)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 with app.app_context():
