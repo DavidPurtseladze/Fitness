@@ -51,7 +51,7 @@ class Workout(db.Model):
     duration = db.Column(db.Integer, nullable=False)
     calories_burned = db.Column(db.Float, nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    exercises = db.relationship('Exercise', backref='workout', lazy=True)
+    exercises = db.relationship('Exercise', backref='workout', lazy=True, cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
