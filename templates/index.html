@@ -15,11 +15,11 @@
                 <div class="name">
                     <p>Name - {{ workout.name }}</p>
                 </div>
-            <form action="/api/Workout/{{ workout.id }}" method="POST">
+           <!-- <form action="/api/Workout/{{ workout.id }}" method="POST">
         <input type="hidden" name="_method" value="DELETE">
-        <input type="submit" value="Delete">
-    </form>
-    <a href="/edit/{{ workout.id }}">Edit</a>
+        <input type="submit" value="Delete"
+    </form>-->
+    <a href="/edit/{{ workout.id }}">Edit</a>>
                 <div class="calories">
                     <p>Calories - {{ workout.calories_burned }}</p>
                 </div>
