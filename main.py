@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask import request, render_template
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 
 app = Flask(__name__)
 
@@ -145,10 +146,8 @@ def update_workout(workout_id):
     if workout is None:
         return jsonify({'error': 'Workout not found'}), 404
 
-    # Get the updated details from the request
     updated_details = request.json
 
-    # Update the workout object with the new details
     workout.name = updated_details.get('name', workout.name)
     workout.type = updated_details.get('type', workout.type)
     workout.duration = updated_details.get('duration', workout.duration)
@@ -157,6 +156,21 @@ def update_workout(workout_id):
     db.session.commit()
 
     return jsonify({'message': 'Workout updated successfully', 'updated_workout': workout.to_dict()}), 200
+@app.route('/api/Workout')
+def get_workouts():
+    day = request.args.get('day')
+    duration = request.args.get('duration')
+    workouts = Workout.query
+
+    if day:
+        workouts = workouts.filter(func.date(Workout.date) == day)
+    elif duration:
+        workouts = workouts.filter(Workout.duration >= duration)
+
+    workouts = workouts.all()
+
+    return jsonify([workout.to_dict() for workout in workouts]),
+
 
 with app.app_context():
     db.create_all()

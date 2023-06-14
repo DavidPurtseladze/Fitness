@@ -12,6 +12,13 @@
     <main>
         {% for workout in workout_list %}
             <div class="workouts">
+           <!-- <div class="filter-section">
+    <label for="filter-day">Filter by Day:</label>
+    <input type="date" id="filter-day" onchange="applyFilters()">
+    <label for="filter-duration">Filter by Duration (minutes):</label>
+    <input type="number" id="filter-duration" onchange="applyFilters()">
+</div>-->
+
                 <div class="name">
                     <p>Name - {{ workout.name }}</p>
                 </div>
