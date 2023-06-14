@@ -116,12 +116,6 @@ def create_workout():
 
 
 
-
-
-
-
-
-
 # Main Page api
 @app.route('/')
 def index_page():
@@ -132,20 +126,40 @@ def index_page():
     workout_list = [workout.to_dict() for workout in workouts]
     return render_template('index.html', workout_list=workout_list)
 
+@app.route('/api/Workout/<int:workout_id>', methods=['DELETE'])
+def delete_workout(workout_id):
+    workout = Workout.query.get(workout_id)
+    if workout is None:
+        return jsonify({'error': 'Workout not found'}), 404
 
+    deleted_workout = workout.to_dict()
 
+    db.session.delete(workout)
+    db.session.commit()
 
+    return jsonify({'message': 'Workout deleted successfully', 'deleted_workout': deleted_workout}), 200
 
+@app.route('/api/Workout/<int:workout_id>', methods=['PUT'])
+def update_workout(workout_id):
+    workout = Workout.query.get(workout_id)
+    if workout is None:
+        return jsonify({'error': 'Workout not found'}), 404
 
+    # Get the updated details from the request
+    updated_details = request.json
 
+    # Update the workout object with the new details
+    workout.name = updated_details.get('name', workout.name)
+    workout.type = updated_details.get('type', workout.type)
+    workout.duration = updated_details.get('duration', workout.duration)
+    workout.calories_burned = updated_details.get('calories_burned', workout.calories_burned)
 
+    db.session.commit()
 
-
-
-
-
-
+    return jsonify({'message': 'Workout updated successfully', 'updated_workout': workout.to_dict()}), 200
 
 with app.app_context():
     db.create_all()
     app.run()
+
+
