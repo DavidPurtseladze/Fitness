@@ -171,6 +171,28 @@ def get_workouts():
 
     return jsonify([workout.to_dict() for workout in workouts]),
 
+@app.route('/api/about')
+def get_about_info():
+    team_members = [
+        {'name': 'Davit Gogilashvili', 'surname': 'Gogilashvili'},
+        {'name': 'Davit Purtseladze', 'surname': 'Purtseladze'},
+        {'name': 'Dimitri Chakvetadze', 'surname': 'Chakvetadze'},
+        {'name': 'Nika Gavardashvili', 'surname': 'Gavardashvili'},
+        {'name': 'Mariam Metreveli', 'surname': 'Metreveli'}
+    ]
+
+    description = "The Fitness App is a comprehensive fitness tracker designed to help you monitor and manage your workouts. " \
+                  "It allows you to create and track your workout routines, record exercise details, track calories burned, and view your progress over time."
+
+    about_info = {
+        'team_number': 9,
+        'team_members': team_members,
+        'description': description
+    }
+
+    return jsonify(about_info)
+
+
 
 with app.app_context():
     db.create_all()
