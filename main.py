@@ -4,14 +4,10 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 
+
 app = Flask(__name__)
-
-# შექმნილი აპლიკაციისთვის ბაზის მისამართის გაწერა, აქვე ბაზას ვარქმევთ სახელს
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///workout.db'
-
-# ვქმნით app-ზე მორგებულ ბაზის პითონურ ობიექტს
 db = SQLAlchemy(app)
-
 
 
 class Exercise(db.Model):
@@ -35,7 +31,6 @@ class Exercise(db.Model):
             'workout_id': self.workout_id
         }
 
-
 class Workout(db.Model):
     __tablename__ = 'workout'
     id = db.Column(db.Integer, primary_key=True)
@@ -58,9 +53,90 @@ class Workout(db.Model):
         }
 
 
+# Main Page
+@app.route('/')
+def index_page():
+    workouts = Workout.query.all()
+    if workouts is None:
+        return jsonify({'error': 'Workouts not found'}), 404
 
-@app.route('/api/Workout', methods=['GET'])
+    workout_list = [workout.to_dict() for workout in workouts]
+    return render_template('index.html', workout_list=workout_list)
+
+# Main Page
+@app.route('/create')
+def create_page():
+    return render_template('create.html')
+
+#  Workout Delete Api
+@app.route('/api/workout/<int:id>', methods=['DELETE'])
+def delete_workout(id):
+    workout = Workout.query.get(id)
+
+    db.session.delete(workout)
+    db.session.commit()
+
+    return jsonify({'message': 'Workout deleted successfully'}), 200
+
+# API to create a workout and exercises
+@app.route('/api/workout', methods=['POST'])
 def create_workout():
+    workout_data = request.get_json()
+
+    # Merge data for sql
+    date = datetime.strptime(workout_data['date'], "%Y-%m-%d")
+    datetime_obj = datetime.strptime(f"{date.year:04d}-{date.month:02d}-{date.day:02d} 00:00:00.000000", "%Y-%m-%d %H:%M:%S.%f")
+
+    # Create a new Workout object
+    workout = Workout(
+        name=workout_data['name'],
+        type=workout_data['type'],
+        duration=workout_data['duration'],
+        calories_burned=workout_data['calories_burned'],
+        date=datetime_obj
+    )
+
+    # Create Exercise objects and associate them with the workout
+    exercises_data = workout_data['exercises']
+    for exercise_data in exercises_data:
+        exercise = Exercise(
+            name     = exercise_data['name'],
+            rep      = int(exercise_data['rep']) if exercise_data['rep'] != '' else None,
+            weight   = float(exercise_data['weight']) if exercise_data['weight'] != '' else None,
+            duration = int(exercise_data['duration']) if exercise_data['duration'] != '' else None,
+            distance = float(exercise_data['distance']) if exercise_data['distance'] != '' else None
+        )
+        workout.exercises.append(exercise)
+
+    # # Add the workout to the database
+    db.session.add(workout)
+    db.session.commit()
+
+    # Return the workout ID
+    return "123", 201
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/api/Workout/add/first/', methods=['GET'])
+def create_workout_once():
     # Create a new workout instance
     workout = Workout(
         name='My Workout',
@@ -104,6 +180,7 @@ def create_workout():
 
     return jsonify(workout.to_dict()), 200
 
+
 # @app.route('/workout/<int:workout_id>', methods=['GET'])
 # def get_workout(workout_id):
 #     # return "great no shit u here", 200
@@ -114,31 +191,18 @@ def create_workout():
 #     return jsonify(workout.to_dict()), 200
 
 
-
-
-
-# Main Page api
-@app.route('/')
-def index_page():
-    workouts = Workout.query.all()
-    if workouts is None:
-        return jsonify({'error': 'Workouts not found'}), 404
-
-    workout_list = [workout.to_dict() for workout in workouts]
-    return render_template('index.html', workout_list=workout_list)
-
-@app.route('/api/Workout/<int:workout_id>', methods=['DELETE'])
-def delete_workout(workout_id):
-    workout = Workout.query.get(workout_id)
-    if workout is None:
-        return jsonify({'error': 'Workout not found'}), 404
-
-    deleted_workout = workout.to_dict()
-
-    db.session.delete(workout)
-    db.session.commit()
-
-    return jsonify({'message': 'Workout deleted successfully', 'deleted_workout': deleted_workout}), 200
+# @app.route('/api/Workout/<int:workout_id>', methods=['DELETE'])
+# def delete_workout(workout_id):
+#     workout = Workout.query.get(workout_id)
+#     if workout is None:
+#         return jsonify({'error': 'Workout not found'}), 404
+#
+#     deleted_workout = workout.to_dict()
+#
+#     db.session.delete(workout)
+#     db.session.commit()
+#
+#     return jsonify({'message': 'Workout deleted successfully', 'deleted_workout': deleted_workout}), 200
 
 @app.route('/api/Workout/<int:workout_id>', methods=['PUT'])
 def update_workout(workout_id):
@@ -156,6 +220,8 @@ def update_workout(workout_id):
     db.session.commit()
 
     return jsonify({'message': 'Workout updated successfully', 'updated_workout': workout.to_dict()}), 200
+
+
 @app.route('/api/Workout')
 def get_workouts():
     day = request.args.get('day')
@@ -170,6 +236,7 @@ def get_workouts():
     workouts = workouts.all()
 
     return jsonify([workout.to_dict() for workout in workouts]),
+
 
 @app.route('/api/about')
 def get_about_info():
@@ -193,9 +260,6 @@ def get_about_info():
     return jsonify(about_info)
 
 
-
 with app.app_context():
     db.create_all()
     app.run()
-
-
