@@ -1,0 +1,8 @@
+# Ignore the instance folder
+/instance/
+
+# Ignore the .idea folder
+/.idea/
+
+# Ignore the prepros.config file
+prepros.config
