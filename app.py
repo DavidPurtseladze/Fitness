@@ -201,4 +201,4 @@ def filter_workouts_by_date_range(workouts, start_date_filter, end_date_filter):
 
 with app.app_context():
     db.create_all()
-    app.run()
+    #app.run()
