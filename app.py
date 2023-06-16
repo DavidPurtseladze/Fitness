@@ -8,6 +8,7 @@ from sqlalchemy import func
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///workout.db'
 db = SQLAlchemy(app)
+#
 
 
 class Exercise(db.Model):
