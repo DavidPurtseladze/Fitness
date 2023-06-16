@@ -68,6 +68,11 @@ def index_page():
 def create_page():
     return render_template('create.html')
 
+@app.route('/edit/<int:id>')
+def edit_page(id):
+    workout = Workout.query.get(id)
+    return render_template('edit.html', workout=workout)
+
 #  Workout Delete Api
 @app.route('/api/workout/<int:id>', methods=['DELETE'])
 def delete_workout(id):
@@ -113,10 +118,42 @@ def create_workout():
     db.session.commit()
 
     # Return the workout ID
-    return "123", 201
+    return "Created Successful", 201
 
+@app.route('/api/workout/<int:id>', methods=['PUT'])
+def edit_workout(id):
+    workout_data = request.get_json()
 
+    workout = Workout.query.get(id)
+    if workout is not None:
 
+        # Merge data for sql
+        date = datetime.strptime(workout_data['date'], "%Y-%m-%d")
+        datetime_obj = datetime.strptime(f"{date.year:04d}-{date.month:02d}-{date.day:02d} 00:00:00.000000", "%Y-%m-%d %H:%M:%S.%f")
+
+        # Edit workout
+        workout.name = workout_data['name']
+        workout.type = workout_data['type']
+        workout.duration = int(workout_data['duration'])
+        workout.calories_burned = float(workout_data['calories_burned'])
+        workout.date = datetime_obj
+        workout.exercises.clear()
+
+        # Create Exercise objects and associate them with the workout
+        exercises_data = workout_data['exercises']
+        for exercise_data in exercises_data:
+            exercise = Exercise(
+                name=exercise_data['name'],
+                rep=int(exercise_data['rep']) if exercise_data['rep'] != '' else None,
+                weight=float(exercise_data['weight']) if exercise_data['weight'] != '' else None,
+                duration=int(exercise_data['duration']) if exercise_data['duration'] != '' else None,
+                distance=float(exercise_data['distance']) if exercise_data['distance'] != '' else None
+            )
+            workout.exercises.append(exercise)
+
+        db.session.commit()
+
+    return "Successfully updated", 200
 
 
 

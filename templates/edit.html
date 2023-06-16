@@ -1,37 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Create Workout</title>
+    <title>edit workout</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 </head>
 <body>
     <div class="container">
-        <h1>Create Workout</h1>
+        <h1>Edit Workout</h1>
         <form id="workoutForm">
+            <input type="hidden" id="id" value="{{ workout.id }}" required>
             <div class="form-group">
                 <label for="name">Workout Name:</label>
-                <input type="text" class="form-control" id="name" name="name" required>
+                <input type="text" class="form-control" id="name" name="name" value="{{ workout.name }}" required>
             </div>
             <div class="form-group">
                 <label for="type">Type:</label>
-                <input type="text" class="form-control" id="type" name="type" required>
+                <input type="text" class="form-control" id="type" name="type" value="{{ workout.type }}" required>
             </div>
             <div class="form-group">
                 <label for="duration">Duration (minutes):</label>
-                <input type="number" class="form-control" id="duration" name="duration" required>
+                <input type="number" class="form-control" id="duration" name="duration" value="{{ workout.duration }}" required>
             </div>
             <div class="form-group">
                 <label for="calories_burned">Calories Burned:</label>
-                <input type="number" class="form-control" id="calories_burned" name="calories_burned" required>
+                <input type="number" class="form-control" id="calories_burned" value="{{ workout.calories_burned }}" name="calories_burned" required>
             </div>
             <div class="form-group">
                 <label for="date">Date:</label>
-                <input type="date" class="form-control" id="date" name="date" required>
+                <input type="date" class="form-control" id="date" value="{{ workout.date }}" name="date" required>
             </div>
 
             <div id="exerciseFields">
                 <h3>Exercises:</h3>
+
+
+                {% for exercise in workout.exercises %}
+
+                    {% if exercise.rep is none %}
+                        <div class="form-group">
+                            <label>Exercise Name:</label>
+                            <input type="text" value="{{ exercise.name }}" class="form-control exercise_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Duration (minutes):</label>
+                            <input type="number" value="{{ exercise.duration }}" class="form-control exercise_duration" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Distance:</label>
+                            <input type="number" value="{{ exercise.distance }}" step="0.01" class="form-control exercise_distance" required>
+                        </div>
+                        <input type="hidden" class="form-control exercise_weight" required>
+                        <input type="hidden" class="form-control exercise_rep" required>
+                        <button type="button" class="btn btn-danger remove-exercise-btn btn-remove-exercise">Remove</button>
+                    {% else %}
+                        <div class="form-group">
+                            <label>Exercise Name:</label>
+                            <input type="text" value="{{ exercise.name }}" class="form-control exercise_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Reps:</label>
+                            <input type="number" value="{{ exercise.rep }}" class="form-control exercise_rep" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Weight:</label>
+                            <input type="number" value="{{ exercise.weight }}" class="form-control exercise_weight" required>
+                        </div>
+                        <input type="hidden" class="form-control exercise_duration" required>
+                        <input type="hidden" step="0.01" class="form-control exercise_distance" required>
+                        <button type="button" class="btn btn-danger remove-exercise-btn btn-remove-exercise">Remove</button>
+                    {% endif %}
+                {% endfor %}
 
             </div>
 
@@ -68,6 +108,15 @@
                 $('#exerciseFields').append(exerciseFields);
             });
 
+            $(document).on("click", ".remove-exercise-btn", function() {
+                $(this).prev().remove();
+                $(this).prev().remove();
+                $(this).prev().remove();
+                $(this).prev().remove();
+                $(this).prev().remove();
+                $(this).remove();
+            });
+
             $('#addTimeBtn').click(function() {
                 var exerciseFields = `
                     <div class="form-group">
@@ -89,22 +138,16 @@
                 $('#exerciseFields').append(exerciseFields);
             });
 
-            $(document).on("click", ".remove-exercise-btn", function() {
-                $(this).prev().remove();
-                $(this).prev().remove();
-                $(this).prev().remove();
-                $(this).prev().remove();
-                $(this).prev().remove();
-                $(this).remove();
-            });
 
             $('#workoutForm').submit(function(event) {
                 event.preventDefault();
                 var form = $(this);
-                var url = 'http://127.0.0.1:5000/api/workout'; // Replace with your actual API URL
+                var url = 'http://127.0.0.1:5000/api/workout/'; // Replace with your actual API URL
 
-                var data = 
+
+                var data =
                 {
+                    id: $("#id").val(),
                     name: $("#name").val(),
                     type: $("#type").val(),
                     duration: $("#duration").val(),
@@ -112,8 +155,9 @@
                     date: $("#date").val(),
                     exercises: []
                 }
+                console.log(data.id)
                 for (let i = 0; i < $(".exercise_name").length; i++) {
-                    var exercise = 
+                    var exercise =
                     {
                         name: $($(".exercise_name")[i]).val(),
                         rep: $($(".exercise_rep")[i]).val(),
@@ -123,11 +167,11 @@
                     }
                     data.exercises.push(exercise);
                 }
-                console.log(data);
+                console.log(url + data.id);
 
                 $.ajax({
-                    type: 'POST',
-                    url: url,
+                    type: 'PUT',
+                    url: url + data.id,
                     data: JSON.stringify(data),
                     contentType: "application/json",
                     success: function(response) {

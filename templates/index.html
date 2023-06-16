@@ -7,45 +7,55 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Fitness App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <main>
-        {% for workout in workout_list %}
-            <div class="workouts">
-           <!-- <div class="filter-section">
-    <label for="filter-day">Filter by Day:</label>
-    <input type="date" id="filter-day" onchange="applyFilters()">
-    <label for="filter-duration">Filter by Duration (minutes):</label>
-    <input type="number" id="filter-duration" onchange="applyFilters()">
-</div>-->{{ workout.id }}
-
-                <div class="name">
-                    <p>Name - {{ workout.name }}</p>
-                </div>
-                <a href="/edit/{{ workout.id }}">Edit</a>>
-                <div class="calories">
-                    <p>Calories - {{ workout.calories_burned }}</p>
-                </div>
-                <div class="type">
-                    <p>Type - {{ workout.type }}</p>
-                </div>
-                <div class="duration">
-                    <p>Duration - {{ workout.duration }}</p>
-                </div>
-                <div class="date">
-                    <p>Date - {{ workout.date }}</p>
-                </div>
-                <div class="exercises">
-
-                    {% for exercise in workout.exercises %}
-                            <p>Name {{ exercise.name }}</p>
-                    {% endfor %}
-                </div>
+    <main class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <a href="/create" class="btn btn-primary create-workout-btn"><i class="fas fa-plus"></i> Create Workout</a>
             </div>
-        {% endfor %}
-
-
-
+        </div>
+        <div class="row justify-content-center">
+            {% for workout in workout_list %}
+                <div class="col-md-6">
+                    <div class="workouts">
+                        <div class="name">
+                            <p><i class="fas fa-dumbbell"></i> Name - {{ workout.name }}</p>
+                        </div>
+                        <a href="/edit/{{ workout.id }}"><i class="fas fa-edit"></i> Edit</a>
+                        <div class="calories">
+                            <p><i class="fas fa-fire"></i> Calories - {{ workout.calories_burned }}</p>
+                        </div>
+                        <div class="type">
+                            <p><i class="fas fa-running"></i> Type - {{ workout.type }}</p>
+                        </div>
+                        <div class="duration">
+                            <p><i class="fas fa-stopwatch"></i> Duration - {{ workout.duration }}</p>
+                        </div>
+                        <div class="date">
+                            <p><i class="far fa-calendar-alt"></i> Date - {{ workout.date }}</p>
+                        </div>
+                        <div class="exercises">
+                            {% for exercise in workout.exercises %}
+                                {% if exercise.rep is none %}
+                                    <p><i class="fas fa-dumbbell"></i> Exercise Name: {{ exercise.name }}</p>
+                                    <p><i class="far fa-clock"></i> Duration: {{ exercise.duration }}</p>
+                                    <p><i class="fas fa-road"></i> Distance: {{ exercise.distance }}</p>
+                                {% else %}
+                                    <p><i class="fas fa-dumbbell"></i> Exercise Name: {{ exercise.name }}</p>
+                                    <p><i class="fas fa-redo"></i> Reps: {{ exercise.rep }}</p>
+                                    <p><i class="fas fa-weight-hanging"></i> Weight: {{ exercise.weight }}</p>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
