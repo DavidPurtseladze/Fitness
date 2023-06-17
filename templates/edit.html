@@ -29,7 +29,7 @@
             </div>
             <div class="form-group">
                 <label for="date">Date:</label>
-                <input type="date" class="form-control" id="date" value="{{ workout.date }}" name="date" required>
+                <input type="date" class="form-control" id="date" value="{{ workout_date }}" name="date" required>
             </div>
 
             <div id="exerciseFields">
@@ -175,10 +175,8 @@
                     data: JSON.stringify(data),
                     contentType: "application/json",
                     success: function(response) {
-                        // Handle success response
-                        console.log(response);
                         alert('Workout created successfully!');
-                        // Redirect or perform any other action
+                        $(location).attr('href', 'http://127.0.0.1:5000/');
                     },
                     error: function(error) {
                         // Handle error response

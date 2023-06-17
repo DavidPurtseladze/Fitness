@@ -35,3 +35,8 @@
 .create-workout-btn {
     margin-bottom: 20px;
 }
+
+.delete-workout-btn {
+    background: transparent !important;
+    border: 0px !important;
+}

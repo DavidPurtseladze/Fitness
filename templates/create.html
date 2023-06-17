@@ -131,10 +131,8 @@
                     data: JSON.stringify(data),
                     contentType: "application/json",
                     success: function(response) {
-                        // Handle success response
-                        console.log(response);
                         alert('Workout created successfully!');
-                        // Redirect or perform any other action
+                        $(location).attr('href', 'http://127.0.0.1:5000/');
                     },
                     error: function(error) {
                         // Handle error response

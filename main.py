@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask import request, render_template
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 
@@ -63,15 +63,22 @@ def index_page():
     workout_list = [workout.to_dict() for workout in workouts]
     return render_template('index.html', workout_list=workout_list)
 
-# Main Page
+# Create Page
 @app.route('/create')
 def create_page():
     return render_template('create.html')
 
+# About Page
+@app.route('/about')
+def get_about_info():
+    return render_template('about.html')
+
+# Edit Page
 @app.route('/edit/<int:id>')
 def edit_page(id):
     workout = Workout.query.get(id)
-    return render_template('edit.html', workout=workout)
+    workout_date = workout.date.strftime('%Y-%m-%d')
+    return render_template('edit.html', workout=workout, workout_date=workout_date)
 
 #  Workout Delete Api
 @app.route('/api/workout/<int:id>', methods=['DELETE'])
@@ -155,147 +162,41 @@ def edit_workout(id):
 
     return "Successfully updated", 200
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@app.route('/api/Workout/add/first/', methods=['GET'])
-def create_workout_once():
-    # Create a new workout instance
-    workout = Workout(
-        name='My Workout',
-        type='Strength Training',
-        duration=60,
-        calories_burned=300,
-        date=datetime.utcnow()
-    )
-
-    # Create a few exercise instances
-    exercise1 = Exercise(
-        name='Squats',
-        rep=10,
-        weight=50,
-        duration=30,
-        distance=None
-    )
-
-    exercise2 = Exercise(
-        name='Push-ups',
-        rep=15,
-        weight=None,
-        duration=10,
-        distance=None
-    )
-
-    exercise3 = Exercise(
-        name='Plank',
-        rep=None,
-        weight=None,
-        duration=60,
-        distance=None
-    )
-
-    # Add the exercises to the workout
-    workout.exercises.extend([exercise1, exercise2, exercise3])
-
-    # Add the workout and exercises to the database
-    db.session.add(workout)
-    db.session.commit()
-
-    return jsonify(workout.to_dict()), 200
-
-
-# @app.route('/workout/<int:workout_id>', methods=['GET'])
-# def get_workout(workout_id):
-#     # return "great no shit u here", 200
-#     workout = Workout.query.get(workout_id)
-#     if workout is None:
-#         return jsonify({'error': 'Workout not found'}), 404
-#
-#     return jsonify(workout.to_dict()), 200
-
-
-# @app.route('/api/Workout/<int:workout_id>', methods=['DELETE'])
-# def delete_workout(workout_id):
-#     workout = Workout.query.get(workout_id)
-#     if workout is None:
-#         return jsonify({'error': 'Workout not found'}), 404
-#
-#     deleted_workout = workout.to_dict()
-#
-#     db.session.delete(workout)
-#     db.session.commit()
-#
-#     return jsonify({'message': 'Workout deleted successfully', 'deleted_workout': deleted_workout}), 200
-
-@app.route('/api/Workout/<int:workout_id>', methods=['PUT'])
-def update_workout(workout_id):
-    workout = Workout.query.get(workout_id)
-    if workout is None:
-        return jsonify({'error': 'Workout not found'}), 404
-
-    updated_details = request.json
-
-    workout.name = updated_details.get('name', workout.name)
-    workout.type = updated_details.get('type', workout.type)
-    workout.duration = updated_details.get('duration', workout.duration)
-    workout.calories_burned = updated_details.get('calories_burned', workout.calories_burned)
-
-    db.session.commit()
-
-    return jsonify({'message': 'Workout updated successfully', 'updated_workout': workout.to_dict()}), 200
-
-
-@app.route('/api/Workout')
+@app.route('/api/workouts', methods=['GET'])
 def get_workouts():
-    day = request.args.get('day')
-    duration = request.args.get('duration')
-    workouts = Workout.query
+    duration_filter = int(request.args.get('duration')) if request.args.get('duration') is not None else 0
+    start_date_filter = request.args.get('start_date')
+    end_date_filter = request.args.get('end_date')
 
-    if day:
-        workouts = workouts.filter(func.date(Workout.date) == day)
-    elif duration:
-        workouts = workouts.filter(Workout.duration >= duration)
+    # Get all workouts from the database
+    workouts = Workout.query.all()
 
-    workouts = workouts.all()
+    # Apply filters if provided
+    if duration_filter:
+        workouts = filter_workouts_by_duration(workouts, duration_filter)
+    if start_date_filter and end_date_filter:
+        workouts = filter_workouts_by_date_range(workouts, start_date_filter, end_date_filter)
 
-    return jsonify([workout.to_dict() for workout in workouts]),
+    return jsonify([workout.to_dict() for workout in workouts]), 200
 
 
-@app.route('/api/about')
-def get_about_info():
-    team_members = [
-        {'name': 'Davit Gogilashvili', 'surname': 'Gogilashvili'},
-        {'name': 'Davit Purtseladze', 'surname': 'Purtseladze'},
-        {'name': 'Dimitri Chakvetadze', 'surname': 'Chakvetadze'},
-        {'name': 'Nika Gavardashvili', 'surname': 'Gavardashvili'},
-        {'name': 'Mariam Metreveli', 'surname': 'Metreveli'}
-    ]
+def filter_workouts_by_duration(workouts, duration_filter):
+    filtered_workouts = []
+    for workout in workouts:
+        if workout.duration >= duration_filter:
+            filtered_workouts.append(workout)
+    return filtered_workouts
 
-    description = "The Fitness App is a comprehensive fitness tracker designed to help you monitor and manage your workouts. " \
-                  "It allows you to create and track your workout routines, record exercise details, track calories burned, and view your progress over time."
 
-    about_info = {
-        'team_number': 9,
-        'team_members': team_members,
-        'description': description
-    }
+def filter_workouts_by_date_range(workouts, start_date_filter, end_date_filter):
+    filtered_workouts = []
+    start_date = datetime.strptime(start_date_filter, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end_date_filter, "%Y-%m-%d").date() + timedelta(days=1)
 
-    return jsonify(about_info)
-
+    for workout in workouts:
+        if start_date <= workout.date.date() < end_date:
+            filtered_workouts.append(workout)
+    return filtered_workouts
 
 with app.app_context():
     db.create_all()
