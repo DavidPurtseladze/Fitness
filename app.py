@@ -175,7 +175,7 @@ def get_workouts():
     # Apply filters if provided
     if duration_filter:
         workouts = filter_workouts_by_duration(workouts, duration_filter)
-    elif start_date_filter and end_date_filter:
+    if start_date_filter and end_date_filter:
         workouts = filter_workouts_by_date_range(workouts, start_date_filter, end_date_filter)
 
     return jsonify([workout.to_dict() for workout in workouts]), 200
@@ -199,4 +199,4 @@ def filter_workouts_by_duration(workouts, duration_filter):
 
 with app.app_context():
     db.create_all()
-    #app.run()
+    app.run()
