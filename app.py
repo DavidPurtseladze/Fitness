@@ -175,7 +175,7 @@ def get_workouts():
     # Apply filters if provided
     if duration_filter:
         workouts = filter_workouts_by_duration(workouts, duration_filter)
-    if start_date_filter and end_date_filter:
+    elif start_date_filter and end_date_filter:
         workouts = filter_workouts_by_date_range(workouts, start_date_filter, end_date_filter)
 
     return jsonify([workout.to_dict() for workout in workouts]), 200
@@ -197,6 +197,35 @@ def filter_workouts_by_duration(workouts, duration_filter):
     return filtered_workouts
 
 
+def calculate_calories_between_dates(start_date, end_date):
+    # Assuming you have a database or some data source containing workout information
+    # Retrieve the relevant workouts between the start and end dates
+    workouts = Workout.query.filter(Workout.date >= start_date, Workout.date <= end_date).all()
+
+    total_calories = 0
+
+    # Iterate over the workouts and sum up the calories burned
+    for workout in workouts:
+        total_calories += workout.calories_burned
+
+    return total_calories
+
+
+@app.route('/api/calories', methods=['GET'])
+def calculate_calories():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    if not start_date or not end_date:
+        return jsonify({'error': 'Start date and end date are required.'}), 400
+    # Perform your calculation to get the calories burned between the start and end dates
+    # Replace this with your actual logic
+    calories_burned = calculate_calories_between_dates(start_date, end_date)
+
+    # Return the calories burned as a JSON response
+    return jsonify({'calories': calories_burned})
+
+
 with app.app_context():
     db.create_all()
-    app.run()
+    #app.run()
