@@ -103,7 +103,7 @@
                 var form = $(this);
                 var url = 'http://127.0.0.1:5000/api/workout'; // Replace with your actual API URL
 
-                var data = 
+                var data =
                 {
                     name: $("#name").val(),
                     type: $("#type").val(),
@@ -113,7 +113,7 @@
                     exercises: []
                 }
                 for (let i = 0; i < $(".exercise_name").length; i++) {
-                    var exercise = 
+                    var exercise =
                     {
                         name: $($(".exercise_name")[i]).val(),
                         rep: $($(".exercise_rep")[i]).val(),

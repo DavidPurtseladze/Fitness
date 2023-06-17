@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 from flask import request, render_template
 from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
+
 
 
 app = Flask(__name__)
@@ -175,19 +175,10 @@ def get_workouts():
     # Apply filters if provided
     if duration_filter:
         workouts = filter_workouts_by_duration(workouts, duration_filter)
-    if start_date_filter and end_date_filter:
+    elif start_date_filter and end_date_filter:
         workouts = filter_workouts_by_date_range(workouts, start_date_filter, end_date_filter)
 
     return jsonify([workout.to_dict() for workout in workouts]), 200
-
-
-def filter_workouts_by_duration(workouts, duration_filter):
-    filtered_workouts = []
-    for workout in workouts:
-        if workout.duration >= duration_filter:
-            filtered_workouts.append(workout)
-    return filtered_workouts
-
 
 def filter_workouts_by_date_range(workouts, start_date_filter, end_date_filter):
     filtered_workouts = []
@@ -198,6 +189,13 @@ def filter_workouts_by_date_range(workouts, start_date_filter, end_date_filter):
         if start_date <= workout.date.date() < end_date:
             filtered_workouts.append(workout)
     return filtered_workouts
+def filter_workouts_by_duration(workouts, duration_filter):
+    filtered_workouts = []
+    for workout in workouts:
+        if workout.duration >= duration_filter:
+            filtered_workouts.append(workout)
+    return filtered_workouts
+
 
 with app.app_context():
     db.create_all()
