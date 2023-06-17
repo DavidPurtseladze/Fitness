@@ -142,7 +142,7 @@
             $('#workoutForm').submit(function(event) {
                 event.preventDefault();
                 var form = $(this);
-                var url = 'http://127.0.0.1:5000/api/workout/'; // Replace with your actual API URL
+                var url = 'http://fitnesstrack.pythonanywhere.com/api/workout/'; // Replace with your actual API URL
 
 
                 var data =
@@ -176,7 +176,7 @@
                     contentType: "application/json",
                     success: function(response) {
                         alert('Workout created successfully!');
-                        $(location).attr('href', 'http://127.0.0.1:5000/');
+                        $(location).attr('href', 'http://fitnesstrack.pythonanywhere.com/');
                     },
                     error: function(error) {
                         // Handle error response

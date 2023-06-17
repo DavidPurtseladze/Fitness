@@ -199,4 +199,4 @@ def filter_workouts_by_duration(workouts, duration_filter):
 
 with app.app_context():
     db.create_all()
-    #app.run()
+    app.run()
